@@ -12,4 +12,4 @@ This is a silly weekend project to follow one of the "Old Reddit Switcheroo" lin
 
 Go to reddit and grab the permalink for the link you want to follow.
 
-Run `python -m src.reddit -c <url>`
+Run `python -m src.main -c <url>`
