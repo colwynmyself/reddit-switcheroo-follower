@@ -10,7 +10,9 @@ def get_links_from_comment(reddit, comment, depth=0):
     found_links = Reddit.get_links_from_comment(comment)
 
     if not found_links:
-        logger.warning(f'No links were found in comment {comment.id}. Searching adjacent comments. Depth {depth}')
+        logger.warning(
+            f'No links were found in comment {comment.id}. Searching adjacent comments. Depth {depth}'
+        )
 
         # search parent comment and child comments to n depth in case someone linked incorrectly
         # At depth > 0 we are searching child comments
@@ -22,16 +24,20 @@ def get_links_from_comment(reddit, comment, depth=0):
         if depth <= 0:
             parent_comment = reddit.get_parent_comment(comment)
             if parent_comment:
-                found_links.extend(get_links_from_comment(reddit, parent_comment, (depth - 1)))
+                found_links.extend(
+                    get_links_from_comment(reddit, parent_comment,
+                                           (depth - 1)))
         if depth >= 0:
             child_comments = reddit.get_child_comments(comment)
             for child_comment in child_comments:
-                child_links = get_links_from_comment(reddit, child_comment, (depth + 1))
+                child_links = get_links_from_comment(reddit, child_comment,
+                                                     (depth + 1))
                 if child_links:
                     found_links.extend(child_links)
                     break
 
     return found_links
+
 
 def main(args):
     config = Config('development')
@@ -49,10 +55,14 @@ def main(args):
         found_links = get_links_from_comment(reddit, comment)
 
         if len(found_links) > 1:
-            logger.info(f'Found {len(found_links)} links for {comment.id}. Using first.')
+            logger.info(
+                f'Found {len(found_links)} links for {comment.id}. Using first.'
+            )
 
         if not found_links:
-            logger.warning(f'Oh no! No links were found in comment {comment.id}. Halting crawl.')
+            logger.warning(
+                f'Oh no! No links were found in comment {comment.id}. Halting crawl.'
+            )
             break
 
         link = found_links[0]
@@ -82,7 +92,8 @@ if __name__ == "__main__":
         required=True,
     )
     parser.add_argument(
-        '-l', '--log-level',
+        '-l',
+        '--log-level',
         help='Log level (default: warning)',
         dest='log_level',
         default='info',
