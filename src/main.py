@@ -25,8 +25,7 @@ def get_links_from_comment(reddit, comment, depth=0):
             parent_comment = reddit.get_parent_comment(comment)
             if parent_comment:
                 found_links.extend(
-                    get_links_from_comment(reddit, parent_comment,
-                                           (depth - 1)))
+                    get_links_from_comment(reddit, parent_comment, (depth - 1)))
         if depth >= 0:
             child_comments = reddit.get_child_comments(comment)
             for child_comment in child_comments:

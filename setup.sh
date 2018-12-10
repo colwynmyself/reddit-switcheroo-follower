@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
 
-ln -s githooks/* .git/hooks/
+cd .git/hooks
+ln -s ../../githooks/* ./
