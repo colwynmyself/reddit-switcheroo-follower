@@ -1,0 +1,25 @@
+version: '3'
+services:
+  mysql:
+    image: postgres:11.1
+    environment:
+      - POSTGRES_USER=rsf_user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=rsf_db
+    networks:
+      - base-network
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    restart: always
+    container_name: rsf_db
+    ports:
+      - "5432:5432"
+# Use custom network for interacting with VPN
+# https://stackoverflow.com/questions/45692255/how-make-openvpn-work-with-docker
+networks:
+  base-network:
+    ipam:
+      config:
+      - subnet: 172.16.238.0/24
+volumes:
+  db_data:

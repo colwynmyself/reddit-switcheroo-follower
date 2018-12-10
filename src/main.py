@@ -1,9 +1,11 @@
 from argparse import ArgumentParser
 
-from src.config import Config
-from src.io import write_links_to_csv
+from src.config import config
 from src.reddit import Reddit
 from src.logger import logger
+from src.models import Db, Link
+
+MAX_DEPTH = 0
 
 
 def get_links_from_comment(reddit, comment, depth=0):
@@ -19,7 +21,7 @@ def get_links_from_comment(reddit, comment, depth=0):
         # At depth < 0 we are seatching parent comments
         # At depth 0 we are searching both directions
         # Max depth of 3 in any direction
-        if abs(depth) > 3:
+        if abs(depth) > MAX_DEPTH:
             return found_links
         if depth <= 0:
             parent_comment = reddit.get_parent_comment(comment)
@@ -39,7 +41,7 @@ def get_links_from_comment(reddit, comment, depth=0):
 
 
 def main(args):
-    config = Config('development')
+    db = Db()
     reddit = Reddit(
         client_id=config.client_id,
         client_secret=config.client_secret,
@@ -70,7 +72,17 @@ def main(args):
         logger.info(f'Following url {url}')
 
     logger.info(f'Found {len(switcheroo_links)} links')
-    write_links_to_csv(args.output, switcheroo_links)
+
+    sess = db.create_session()
+
+    depth = 0
+    for text, link in switcheroo_links:
+        depth += 1
+        l = Link(url=link, text=text, depth=depth)
+        sess.add(l)
+
+    sess.commit()
+    sess.close()
 
 
 if __name__ == "__main__":
@@ -81,13 +93,6 @@ if __name__ == "__main__":
         '--comment',
         help='Comment to start the hole at',
         dest='comment',
-        required=True,
-    )
-    parser.add_argument(
-        '-o',
-        '--output',
-        help='CSV to output data into',
-        dest='output',
         required=True,
     )
     parser.add_argument(

@@ -2,3 +2,9 @@ development:
   client_id: ''
   client_secret: ''
   user_agent: 'desktop:reddit_switcheroo_follower:v0.0.1 (by /u/colwynmyself)'
+  database:
+    user: rsf_user
+    pass: ''
+    name: rsf_db
+    host: 127.0.0.1
+    port: 5432
