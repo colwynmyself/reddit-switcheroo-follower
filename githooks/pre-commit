@@ -5,4 +5,4 @@
 # it wants to stop the commit.
 
 yapf . -r -vv -i
-git add **/*.py
+git add ./\*.py
