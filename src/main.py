@@ -41,12 +41,13 @@ def get_links_from_comment(reddit, comment, depth=0):
 
 
 def main(args):
+    logger.setLevel(args.log_level.upper())
+
     db = Db()
     reddit = Reddit(
         client_id=config.client_id,
         client_secret=config.client_secret,
         user_agent=config.user_agent)
-    logger.setLevel(args.log_level.upper())
 
     switcheroo_links = []
     url = args.comment

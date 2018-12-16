@@ -7,6 +7,8 @@ This is a silly weekend project to follow one of the "Old Reddit Switcheroo" lin
 * Get `pyenv` and `pyenv-virtualenv`
 * `pip install pipenv`
 * `pipenv install --dev`
+* `docker-compose up -d`
+* Create the `rsf_db` database and run `schema.sql` against it.
 
 ## Following A Link
 
