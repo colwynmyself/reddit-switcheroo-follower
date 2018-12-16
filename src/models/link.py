@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column
+from sqlalchemy import Table, Column, ForeignKey
 from sqlalchemy.types import INTEGER, String
 
 from src.models.db import Base
@@ -11,3 +11,4 @@ class Link(Base):
     url = Column(String(500), nullable=False)
     text = Column(String(100), nullable=False)
     depth = Column(INTEGER, nullable=False)
+    parent_link_id = Column(INTEGER, ForeignKey('links.id'))

@@ -76,10 +76,14 @@ def main(args):
     sess = db.create_session()
 
     depth = 0
+    parent_link_id = None
     for text, link in switcheroo_links:
         depth += 1
-        l = Link(url=link, text=text, depth=depth)
+        l = Link(
+            url=link, text=text, depth=depth, parent_link_id=parent_link_id)
         sess.add(l)
+        sess.flush()
+        parent_link_id = l.id
 
     sess.commit()
     sess.close()
