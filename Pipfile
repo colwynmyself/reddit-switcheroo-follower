@@ -9,7 +9,7 @@ black = "==18.9b0"
 
 [packages]
 praw = "==6.0.0"
-pyyaml = "==3.13"
+pyyaml = "==4.2b4"
 sqlalchemy = "==1.2.14"
 psycopg2-binary = "==2.7.6.1"
 
