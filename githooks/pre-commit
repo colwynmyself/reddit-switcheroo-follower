@@ -4,5 +4,11 @@
 # exit with non-zero status after issuing an appropriate message if
 # it wants to stop the commit.
 
-yapf . -r -vv -i
-git add ./\*.py
+python_files=$(git diff --name-only --staged | grep '.py$')
+
+if [ ! -z "$python_files" ]; then
+    for file in $python_files; do
+        black --py36 "$file"
+        git add "$file"
+    done
+fi

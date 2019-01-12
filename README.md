@@ -9,6 +9,7 @@ This is a silly weekend project to follow one of the "Old Reddit Switcheroo" lin
 * `pipenv install --dev`
 * `docker-compose up -d`
 * Create the `rsf_db` database and run `schema.sql` against it.
+* `./setup.sh`
 
 ## Following A Link
 
