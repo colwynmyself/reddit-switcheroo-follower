@@ -11,43 +11,47 @@ def main(args):
     reddit = Reddit(
         client_id=config.client_id,
         client_secret=config.client_secret,
-        user_agent=config.user_agent)
+        user_agent=config.user_agent,
+    )
     redditor = reddit.get_redditor(args.user)
-    all_submissions = []
 
-    submissions = redditor.submissions.new()
-    while True:
-        all_submissions.extend(submissions)
+    submissions = redditor.submissions.new(limit=None)
 
-        try:
-            submissions = next(submissions)
-        except StopIteration:
-            break
-
-    for submission in all_submissions:
-        print('\n-----------\n')
+    total_submissions = 0
+    for submission in submissions:
+        total_submissions += 1
         print(submission.title)
-        print(f'https://www.reddit.com{submission.permalink}')
+        print(f"https://www.reddit.com{submission.permalink}")
         print(submission.url)
+        print("-----------\n")
+
+    print("--------- COMMENTS -----------")
+    comments = redditor.comments.new(limit=None)
+
+    total_comments = 0
+    for comment in comments:
+        total_comments += 1
+        print(comment.body)
+        print(f"https://www.reddit.com{comment.permalink}")
+        print("-----------\n")
+
+    print(total_submissions)
+    print(total_comments)
 
 
 if __name__ == "__main__":
     parser = ArgumentParser()
 
     parser.add_argument(
-        '-u',
-        '--username',
-        help='User to get details of',
-        dest='user',
-        required=True,
+        "-u", "--username", help="User to get details of", dest="user", required=True
     )
     parser.add_argument(
-        '-l',
-        '--log-level',
-        help='Log level (default: warning)',
-        dest='log_level',
-        default='info',
-        choices=['debug', 'info', 'warning', 'error', 'critical'],
+        "-l",
+        "--log-level",
+        help="Log level (default: warning)",
+        dest="log_level",
+        default="info",
+        choices=["debug", "info", "warning", "error", "critical"],
     )
     args = parser.parse_args()
     main(args)
