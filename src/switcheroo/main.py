@@ -1,9 +1,9 @@
 from argparse import ArgumentParser
 
-from src.config import config
+from src.switcheroo.config import config
 from src.reddit import Reddit
-from src.logger import logger
-from src.models import Db, Link
+from src.util.logger import logger
+from src.switcheroo.models import Db, Link
 
 MAX_DEPTH = 0
 

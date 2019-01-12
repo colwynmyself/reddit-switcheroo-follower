@@ -1,7 +1,7 @@
 from sqlalchemy import Table, Column, ForeignKey
 from sqlalchemy.types import INTEGER, String
 
-from src.models.db import Base
+from src.switcheroo.models.db import Base
 
 
 class Link(Base):

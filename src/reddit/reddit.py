@@ -1,7 +1,6 @@
 import re
 import praw
-from praw.models import Comment
-
+from praw.models import Comment, Redditor
 from src.reddit.decorators import RequestDecorator
 
 request_decorator = RequestDecorator()
@@ -18,15 +17,23 @@ class Reddit:
     def __init__(self, *args, **kwargs):
         self._reddit = praw.Reddit(**kwargs)
 
+    # Redditor
+    @request_decorator.make_request
+    def get_redditor(self, name):
+        return Redditor(self._reddit, name=name)
+
+    @request_decorator.make_request
+    def get_redditor_submissions(self, redditor, *args, **kwargs):
+        return redditor.submissions.top(*args, **kwargs)
+
+    # Comment
     @request_decorator.make_request
     def get_comment_from_url(self, url):
-        comment = Comment(self._reddit, url=url)
-        return comment
+        return Comment(self._reddit, url=url)
 
     @request_decorator.make_request
     def get_comment_from_id(self, id):
-        comment = Comment(self._reddit, id=id)
-        return comment
+        return Comment(self._reddit, id=id)
 
     @request_decorator.make_request
     def get_parent_comment(self, comment):

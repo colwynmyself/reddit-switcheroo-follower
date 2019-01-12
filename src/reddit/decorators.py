@@ -1,7 +1,7 @@
 from time import sleep
 from datetime import datetime
 
-from src.logger import logger
+from src.util.logger import logger
 
 
 class RequestDecorator:
