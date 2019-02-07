@@ -5,6 +5,10 @@ from src.reddit import Reddit
 from src.util.logger import logger
 
 
+def sort_dict_items(item):
+    return (item[1], item[0])
+
+
 def main(args):
     logger.setLevel(args.log_level.upper())
 
@@ -17,26 +21,36 @@ def main(args):
 
     submissions = redditor.submissions.new(limit=None)
 
-    total_submissions = 0
+    submitted_subreddits = {}
+    logger.info("Fetching submissions")
+    submission_count = 0
     for submission in submissions:
-        total_submissions += 1
-        print(submission.title)
-        print(f"https://www.reddit.com{submission.permalink}")
-        print(submission.url)
-        print("-----------\n")
+        if submission_count % 100 == 0:
+            logger.info(f"Fetched {submission_count} submissions")
 
-    print("--------- COMMENTS -----------")
+        subreddit = submission.subreddit.display_name
+        submitted_subreddits[subreddit] = submitted_subreddits.get(subreddit, 0) + 1
+
+        submission_count += 1
+    logger.info(f"Fetched {submission_count} submissions")
+
     comments = redditor.comments.new(limit=None)
 
-    total_comments = 0
+    commented_subreddits = {}
+    logger.info("Fetching comments")
+    comment_count = 0
     for comment in comments:
-        total_comments += 1
-        print(comment.body)
-        print(f"https://www.reddit.com{comment.permalink}")
-        print("-----------\n")
+        if comment_count % 100 == 0:
+            logger.info(f"Fetched {comment_count} comments")
 
-    print(total_submissions)
-    print(total_comments)
+        subreddit = comment.subreddit.display_name
+        commented_subreddits[subreddit] = commented_subreddits.get(subreddit, 0) + 1
+
+        comment_count += 1
+    logger.info(f"Fetched {comment_count} comments")
+
+    print(sorted(submitted_subreddits.items(), key=sort_dict_items, reverse=True))
+    print(sorted(commented_subreddits.items(), key=sort_dict_items, reverse=True))
 
 
 if __name__ == "__main__":
