@@ -3,10 +3,68 @@ from argparse import ArgumentParser
 from src.switcheroo.config import config
 from src.reddit import Reddit
 from src.util.logger import logger
+from src.db import Db
+from src.db.models import Comment, User, Submission, Subreddit
 
 
 def sort_dict_items(item):
     return (item[1], item[0])
+
+
+def upsert_subreddit(session, sub):
+    subreddit = (
+        session.query(Subreddit).filter(Subreddit.reddit_id == sub.id).one_or_none()
+    )
+    if not subreddit:
+        subreddit = Subreddit(reddit_id=sub.id, name=sub.display_name)
+        session.add(subreddit)
+        session.flush()
+
+    return subreddit
+
+
+def upsert_submission(session, subreddit, user, s):
+    submission = (
+        session.query(Submission).filter(Submission.reddit_id == s.id).one_or_none()
+    )
+    if not submission:
+        submission = Submission(
+            reddit_id=s.id,
+            title=s.title,
+            text=s.selftext,
+            permalink=s.permalink,
+            url=s.url,
+            author_id=user.id,
+            subreddit_id=subreddit.id,
+        )
+        session.add(submission)
+        session.flush()
+
+    return submission
+
+
+def upsert_comment(session, subreddit, user, submission, comment):
+    c = session.query(Comment).filter(Comment.reddit_id == comment.id).one_or_none()
+    if not c:
+        c = Comment(
+            reddit_id=comment.id,
+            body=comment.body,
+            permalink=comment.permalink,
+            submission_id=submission.id,
+            author_id=user.id,
+            subreddit_id=subreddit.id,
+        )
+        session.add(c)
+    return c
+
+
+def upsert_redditor(session, redditor):
+    user = session.query(User).filter(User.reddit_id == redditor.id).one_or_none()
+    if not user:
+        user = User(reddit_id=redditor.id, username=redditor.name)
+        session.add(user)
+        session.flush()
+    return user
 
 
 def main(args):
@@ -17,40 +75,53 @@ def main(args):
         client_secret=config.client_secret,
         user_agent=config.user_agent,
     )
+    db = Db()
+    session = db.create_session()
+
     redditor = reddit.get_redditor(args.user)
+    user = upsert_redditor(session, redditor)
 
+    seen_subreddits = {}
     submissions = redditor.submissions.new(limit=None)
-
-    submitted_subreddits = {}
-    logger.info("Fetching submissions")
     submission_count = 0
     for submission in submissions:
         if submission_count % 100 == 0:
-            logger.info(f"Fetched {submission_count} submissions")
-
-        subreddit = submission.subreddit.display_name
-        submitted_subreddits[subreddit] = submitted_subreddits.get(subreddit, 0) + 1
-
+            print(f"Finished {submission_count} submissions")
+            session.commit()
         submission_count += 1
-    logger.info(f"Fetched {submission_count} submissions")
+        sub = submission.subreddit
+
+        # Check cache
+        subreddit = seen_subreddits.get(sub.id)
+        if not subreddit:
+            subreddit = upsert_subreddit(session, sub)
+            seen_subreddits[sub.id] = subreddit
+
+        upsert_submission(session, subreddit, user, submission)
+    print(f"{submission_count} total submissoins")
 
     comments = redditor.comments.new(limit=None)
-
-    commented_subreddits = {}
-    logger.info("Fetching comments")
     comment_count = 0
     for comment in comments:
         if comment_count % 100 == 0:
-            logger.info(f"Fetched {comment_count} comments")
-
-        subreddit = comment.subreddit.display_name
-        commented_subreddits[subreddit] = commented_subreddits.get(subreddit, 0) + 1
-
+            print(f"Finished {comment_count} comments")
+            session.commit()
         comment_count += 1
-    logger.info(f"Fetched {comment_count} comments")
+        sub = comment.subreddit
 
-    print(sorted(submitted_subreddits.items(), key=sort_dict_items, reverse=True))
-    print(sorted(commented_subreddits.items(), key=sort_dict_items, reverse=True))
+        # Check cache
+        subreddit = seen_subreddits.get(sub.id)
+        if not subreddit:
+            subreddit = upsert_subreddit(session, sub)
+            seen_subreddits[sub.id] = subreddit
+
+        submission = upsert_submission(session, subreddit, user, comment.submission)
+
+        upsert_comment(session, subreddit, user, submission, comment)
+    print(f"{comment_count} total comments")
+
+    session.commit()
+    session.close()
 
 
 if __name__ == "__main__":
