@@ -12,6 +12,7 @@ praw = "==6.0.0"
 pyyaml = "==4.2b4"
 sqlalchemy = "==1.2.14"
 psycopg2-binary = "==2.7.6.1"
+pyside2 = "==5.12"
 
 [requires]
 python_version = "3.6"
